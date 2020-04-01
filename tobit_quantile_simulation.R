@@ -1,7 +1,3 @@
-# Hi Zac, press CTR + ALT + R to begin :)
-
-# Ideas for graphing: just connect the dots on alpha for bias (found - truth) and variance (found - mean)^2
-
 library(sn)
 library(stats)
 library(tibble)
