@@ -1,0 +1,138 @@
+---
+title: "Tobit v.s. Quantile Analysis"
+author: "Carver Coleman"
+date: "April 1, 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+```{r echo = FALSE}
+# Read in Simulation data
+quantile <- read.csv("quantile.csv")
+tobit <- read.csv("tobit.csv")
+```
+
+Change in Alpha with cutoffs greater than or equal to top 75% of data
+```{r}
+# Calculate subsetted averages
+tobit_alpha <- subset(tobit, tobit$Cutoff >= .75)
+tob <- tapply(tobit_alpha$Coefficient, tobit_alpha$Alpha, mean)
+quantile_alpha <- subset(quantile, quantile$Cutoff >= .75)
+quant <- tapply(quantile_alpha$Coefficient, quantile_alpha$Alpha, mean)
+
+# Create dataframe with bias and MSE
+data <- data.frame(-3:3, tob - .5, (tob - .5)^2, "Tobit", row.names = 1:7)
+data1 <- data.frame(-3:3, quant - .5, (quant - .5)^2, "Quantile", row.names = 1:nrow(data))
+colnames(data) <- c("Alpha", "Bias", "MSE" , "Type")
+colnames(data1) <- colnames(data)
+final <- as.data.frame(rbind(data, data1))
+
+# Bias graph
+jpeg('alpha_bias.jpg', quality = 100, width = 12, height = 8, units = "in", res = 300)
+ggplot(final, aes(x = Alpha, y = Bias, color = Type)) +
+  geom_point() +
+  geom_path() + 
+  geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
+  ylim(-.1, .1) + 
+  labs(title = "Tobit and Quantile Bias for levels of Skewness",
+       subtitle = "Only Cutoffs above 75th percentile")
+dev.off()
+
+# MSE graph
+jpeg('alpha_mse.jpg', quality = 100, width = 12, height = 8, units = "in", res = 300)
+ggplot(final, aes(x = Alpha, y = MSE, color = Type)) +
+  geom_point() +
+  geom_path() + 
+  geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
+  ylim(-.005, .005) + 
+  labs(title = "Tobit and Quantile MSE for levels of Skewness",
+       subtitle = "Only Cutoffs above 75th percentile")
+dev.off()
+
+```
+Change in Omega with 75th Percentile and Above and Base Alpha level
+```{r}
+# Calculate subsetted averages
+tobit_alpha <- subset(tobit, tobit$Cutoff >= .75 & tobit$Alpha == 0)
+tob <- tapply(tobit_alpha$Coefficient, tobit_alpha$Omega, mean)
+quantile_alpha <- subset(quantile, quantile$Cutoff >= .75 & quantile$Alpha %in% c(-3,-2,-1))
+quant <- tapply(quantile_alpha$Coefficient, quantile_alpha$Omega, mean)
+
+# Create dataframe with bias and MSE
+data <- data.frame(1:7, tob - .5, (tob - .5)^2, "Tobit", row.names = 1:nrow(data))
+data1 <- data.frame(1:7, quant - .5, (quant - .5)^2, "Quantile", row.names = 1:nrow(data1))
+colnames(data) <- c("Omega", "Bias", "MSE", "Type")
+colnames(data1) <- colnames(data)
+final <- as.data.frame(rbind(data, data1))
+
+# Bias graph
+jpeg('omega_bias.jpg', quality = 100, width = 12, height = 8, units = "in", res = 300)
+ggplot(final, aes(x = Omega, y = Bias, color = Type)) +
+  geom_point() +
+  geom_path() + 
+  geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
+  ylim(-.1, .1) + 
+  labs(title = "Tobit and Quantile Bias for levels of Spread",
+       subtitle = "Only Cutoffs above 75th percentile and Base Skewness")
+dev.off()
+
+# MSE graph
+jpeg('omega_mse.jpg', quality = 100, width = 12, height = 8, units = "in", res = 300)
+ggplot(final, aes(x = Omega, y = MSE, color = Type)) +
+  geom_point() +
+  geom_path() + 
+  geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
+  ylim(-.0005, .0005) + 
+  labs(title = "Tobit and Quantile MSE for levels of Spread",
+       subtitle = "Only Cutoffs above 75th percentile and Base Skewness")
+dev.off()
+
+```
+Change in Cutoff with Base Alpha level
+```{r}
+# Calculate subsetted averages
+tobit_alpha <- subset(tobit, tobit$Alpha == 0)
+tob <- tapply(tobit_alpha$Coefficient, tobit_alpha$Cutoff, mean)
+quantile_alpha <- subset(quantile, quantile$Alpha %in% c(-3,-2,-1))
+quant <- tapply(quantile_alpha$Coefficient, quantile_alpha$Cutoff, mean)
+
+# Create dataframe with bias and MSE
+data <- data.frame(c(.65, .7, .75, .8, .85, .9, .95), tob - .5, (tob - .5)^2, "Tobit", 
+                   row.names = 1:nrow(data))
+data1 <- data.frame(c(.65, .7, .75, .8, .85, .9, .95), quant - .5, (quant - .5)^2, "Quantile", 
+                    row.names = 1:nrow(data1))
+colnames(data) <- c("Cutoff", "Bias", "MSE", "Type")
+colnames(data1) <- colnames(data)
+final <- as.data.frame(rbind(data, data1))
+
+# Bias graph
+jpeg('cutoff_bias.jpg', quality = 100, width = 12, height = 8, units = "in", res = 300)
+ggplot(final, aes(x = Cutoff, y = Bias, color = Type)) +
+  geom_point() +
+  geom_path() + 
+  geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
+  ylim(-.1, .1) + 
+  labs(title = "Tobit and Quantile Bias for Percentile Cutoff Levels",
+       subtitle = "Only Base Skewness")
+dev.off()
+
+# MSE graph
+jpeg('cutoff_mse.jpg', quality = 100, width = 12, height = 8, units = "in", res = 300)
+ggplot(final, aes(x = Cutoff, y = MSE, color = Type)) +
+  geom_point() +
+  geom_path() + 
+  geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
+  ylim(-.0005, .0005) + 
+  labs(title = "Tobit and Quantile MSE for Percentile Cutoff Levels",
+       subtitle = "Only Base Skewness")
+dev.off()
+
+
+
+```
+
