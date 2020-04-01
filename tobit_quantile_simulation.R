@@ -20,65 +20,17 @@ library(quantreg)
 
 #function will produce a dataframe with y, a column of 1s x_0, and x_1
 
-skewed_df <- function(alpha=0, omega=1, beta=0, cutoff_l=NA, cutoff_r=NA, n=1000){
+skewed_df <- function(alpha=0, omega=1, beta=0, cutoff=NA, n=1000){
   x_0 <- rep.int(1,n)
   x_1 <- runif(n,-1,1)
   #To keep things simple, I am making x_1 uniformly distributed around 0
   y <- beta*x_1 + rsn(n=n, xi=0, omega=omega, alpha=alpha, tau=0, dp=NULL)
-  if (!is.na(cutoff_l)){
-    y <- ifelse(y <= quantile(y, cutoff_l), quantile(y, cutoff_l), y)
-  }
-  if (!is.na(cutoff_r)){
-    y <- ifelse(y >= quantile(y, cutoff_r), quantile(y, cutoff_r), y)
+  if (!is.na(cutoff)){
+    y <- ifelse(y >= quantile(y, cutoff), quantile(y, cutoff), y)
   }
   df <- tibble(y, x_0, x_1)
   return(df)
 }
-# # 
-# # 
-# cutoff <- .8
-# 
-# 
-# output1 <- c()
-# output <- c()
-# cutoff_val <- c()
-# 
-# #for (cutoff in c(0.7, 0.75, 0.8, 0.85, 0.9, 0.95)) {
-#   for (i in 1:500) {
-#     df <- skewed_df(alpha=-3, omega=1, beta=.5, cutoff_l = NA, cutoff_r = cutoff, 1000)
-#     #my_model <- rq(y ~ x_1, data= df, tau = .5)
-#     tobit <- vglm(y ~ x_1, tobit(Upper = max(df$y), Lower = min(df$y)), data = df)
-#     
-#     #output <- append(output, my_model$coefficients[2])
-#     #cutoff_val <- append(cutoff_val, cutoff)
-#     output1[i] <- as.numeric(coef(summary(tobit))[3], 1)
-#   }
-# #}
-# 
-# ggplot2::ggplot(as.data.frame(output1), ggplot2::aes(x = output1)) +
-#   ggplot2::geom_density()
-# 
-# 
-# 
-# final_data <- as.data.frame(cbind(cutoff_val, output1))
-# rownames(final_data) <- 1:nrow(final_data)
-# tapply(final_data$output, as.factor(final_data$cutoff_val), mean)
-# 
-# ggplot2::ggplot(as.data.frame(output), ggplot2::aes(x = output)) +
-#   ggplot2::geom_density()
-# 
-# mean(output1)
-# plot(df$x_1,df$y)
-# write.csv(df, "data.csv")
-
-
-
-
-# 
-# df_2 <- skewed_df(alpha=-2, omega=3, beta=5, cutoff_l = -10, cutoff_r = 10, 1000)
-# plot(df_2$x_1,df_2$y)
-
-
 
 # Set beta, number of bootstraps, and sample size 
 beta <- .5
@@ -100,7 +52,7 @@ for (alpha in alpha_range) {
     for (cutoff in cutoff_range) {
       for (i in 1:boot) {
         # Generate dataset
-        df <- skewed_df(alpha=alpha, omega=omega, beta=beta, cutoff_l = NA, cutoff_r = cutoff, N)
+        df <- skewed_df(alpha=alpha, omega=omega, beta=beta, cutoff = cutoff, N)
         
         # Quantile Regression
         my_model <- rq(y ~ x_1, data= df, tau = .5)
