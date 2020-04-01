@@ -14,7 +14,7 @@ library(quantreg)
 
 #beta refers to true marginal effect of x on y
 
-#cutoff_l refers to a value for a left-side cutoff, cutoff_r for a right-side
+#cutoff refers to the percentile that is censored
 
 #n refers to number of observations
 
