@@ -8,6 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
+library(knitr)
 theme_set(theme_bw())
 ```
 
@@ -16,6 +17,27 @@ theme_set(theme_bw())
 quantile <- read.csv("quantile.csv")
 tobit <- read.csv("tobit.csv")
 ```
+
+Regressions and Correlation Matrices
+```{r}
+tobit_bias_regression <- lm(Coefficient ~ Alpha + Omega + Cutoff, data = tobit)
+summary(tobit_bias_regression)
+
+tobit_mse_regression <- lm((Coefficient - .5)^2 ~ Alpha + Omega + Cutoff, data = tobit)
+summary(tobit_mse_regression)
+
+quant_bias_regression <- lm(Coefficient ~ Alpha + Omega + Cutoff, data = quantile)
+summary(quant_bias_regression)
+
+quant_mse_regression <- lm((Coefficient - .5)^2 ~ Alpha + Omega + Cutoff, data = quantile)
+summary(quant_mse_regression)
+
+kable(cor(quantile))
+
+kable(cor(tobit))
+```
+
+Graphics:
 
 Change in Alpha with cutoffs greater than or equal to top 75% of data
 ```{r}
