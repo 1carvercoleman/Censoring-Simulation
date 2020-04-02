@@ -1,3 +1,5 @@
+
+
 library(sn)
 library(stats)
 library(tibble)
@@ -50,8 +52,15 @@ for (alpha in alpha_range) {
         # Generate dataset
         df <- skewed_df(alpha=alpha, omega=omega, beta=beta, cutoff = cutoff, N)
         
+        # Asses if a .5 tau is valid for quantile
+        extreme_quantile <- 1 - mean(df$y[df$x_1 >= quantile(df$x_1, .95)] == max(df$y))
+        if (extreme_quantile >= 0.5) {
+          # If above 0.5, set tau to 0.5
+          extreme_quantile <- 0.501
+        }
+        
         # Quantile Regression
-        my_model <- rq(y ~ x_1, data= df, tau = .5)
+        my_model <- rq(y ~ x_1, data= df, tau = round(extreme_quantile - 0.05, 1))
         
         # Tobit Regression
         tobit <- vglm(y ~ x_1, tobit(Upper = max(df$y), Lower = min(df$y)), data = df)
@@ -65,6 +74,7 @@ for (alpha in alpha_range) {
         insert_data$Coefficient[1] <- as.numeric(coef(summary(tobit))[3], 1)
         tobit_data <- as.data.frame(rbind(tobit_data, insert_data))
         
+        # Update Progress file
         counter <- counter + 1
         fileConn <- file("progress.txt")
         writeLines(paste0("Simulation is ", round((counter / total) * 100, 2), "% complete"), fileConn)
@@ -81,3 +91,5 @@ write.csv(tobit_data, "tobit.csv", row.names = FALSE)
 
 print("Simulation Complete. CSV's are located in the following directory:")
 print(getwd())
+
+
