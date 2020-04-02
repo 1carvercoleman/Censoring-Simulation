@@ -42,10 +42,8 @@ Graphics:
 Change in Alpha with cutoffs greater than or equal to top 75% of data
 ```{r}
 # Calculate subsetted averages
-tobit_alpha <- subset(tobit, tobit$Cutoff >= .75)
-tob <- tapply(tobit_alpha$Coefficient, tobit_alpha$Alpha, mean)
-quantile_alpha <- subset(quantile, quantile$Cutoff >= .75)
-quant <- tapply(quantile_alpha$Coefficient, quantile_alpha$Alpha, mean)
+tob <- tapply(tobit$Coefficient, tobit$Alpha, mean)
+quant <- tapply(quantile$Coefficient, quantile$Alpha, mean)
 
 # Create dataframe with bias and MSE
 data <- data.frame(-3:3, tob - .5, (tob - .5)^2, "Tobit", row.names = 1:7)
@@ -61,8 +59,7 @@ ggplot(final, aes(x = Alpha, y = Bias, color = Type)) +
   geom_path() + 
   geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
   ylim(-.1, .1) + 
-  labs(title = "Tobit and Quantile Bias for levels of Skewness",
-       subtitle = "Only Cutoffs above 75th percentile")
+  labs(title = "Tobit and Quantile Bias for levels of Skewness")
 dev.off()
 
 # MSE graph
@@ -72,17 +69,16 @@ ggplot(final, aes(x = Alpha, y = MSE, color = Type)) +
   geom_path() + 
   geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
   ylim(-.005, .005) + 
-  labs(title = "Tobit and Quantile MSE for levels of Skewness",
-       subtitle = "Only Cutoffs above 75th percentile")
+  labs(title = "Tobit and Quantile MSE for levels of Skewness")
 dev.off()
 
 ```
 Change in Omega with 75th Percentile and Above and Base Alpha level
 ```{r}
 # Calculate subsetted averages
-tobit_alpha <- subset(tobit, tobit$Cutoff >= .75 & tobit$Alpha == 0)
+tobit_alpha <- subset(tobit, tobit$Alpha == 0)
 tob <- tapply(tobit_alpha$Coefficient, tobit_alpha$Omega, mean)
-quantile_alpha <- subset(quantile, quantile$Cutoff >= .75 & quantile$Alpha %in% c(-3,-2,-1))
+quantile_alpha <- subset(quantile, quantile$Alpha %in% c(-2,-1,0,1,2))
 quant <- tapply(quantile_alpha$Coefficient, quantile_alpha$Omega, mean)
 
 # Create dataframe with bias and MSE
@@ -100,7 +96,7 @@ ggplot(final, aes(x = Omega, y = Bias, color = Type)) +
   geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
   ylim(-.1, .1) + 
   labs(title = "Tobit and Quantile Bias for levels of Spread",
-       subtitle = "Only Cutoffs above 75th percentile and Base Skewness")
+       subtitle = "With Non-extreme Skewness")
 dev.off()
 
 # MSE graph
@@ -111,7 +107,7 @@ ggplot(final, aes(x = Omega, y = MSE, color = Type)) +
   geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
   ylim(-.0005, .0005) + 
   labs(title = "Tobit and Quantile MSE for levels of Spread",
-       subtitle = "Only Cutoffs above 75th percentile and Base Skewness")
+       subtitle = "With Non-extreme Skewness")
 dev.off()
 
 ```
@@ -120,7 +116,7 @@ Change in Cutoff with Base Alpha level
 # Calculate subsetted averages
 tobit_alpha <- subset(tobit, tobit$Alpha == 0)
 tob <- tapply(tobit_alpha$Coefficient, tobit_alpha$Cutoff, mean)
-quantile_alpha <- subset(quantile, quantile$Alpha %in% c(-3,-2,-1))
+quantile_alpha <- subset(quantile, quantile$Alpha %in% c(-2,-1,0,1,2))
 quant <- tapply(quantile_alpha$Coefficient, quantile_alpha$Cutoff, mean)
 
 # Create dataframe with bias and MSE
@@ -140,7 +136,7 @@ ggplot(final, aes(x = Cutoff, y = Bias, color = Type)) +
   geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
   ylim(-.1, .1) + 
   labs(title = "Tobit and Quantile Bias for Percentile Cutoff Levels",
-       subtitle = "Only Base Skewness")
+       subtitle = "With Non-extreme Skewness")
 dev.off()
 
 # MSE graph
@@ -151,7 +147,7 @@ ggplot(final, aes(x = Cutoff, y = MSE, color = Type)) +
   geom_abline(mapping = aes(slope = 0, intercept = 0)) + 
   ylim(-.0005, .0005) + 
   labs(title = "Tobit and Quantile MSE for Percentile Cutoff Levels",
-       subtitle = "Only Base Skewness")
+       subtitle = "With Non-extreme Skewness")
 dev.off()
 
 
