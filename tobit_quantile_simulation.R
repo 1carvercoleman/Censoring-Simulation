@@ -1,5 +1,3 @@
-
-
 library(sn)
 library(stats)
 library(tibble)
@@ -35,15 +33,19 @@ beta <- .5
 boot <- 500
 N <- 1000
 
-#Initialize dataframes
+# Initialize dataframes
 quantile_data <- setNames(data.frame(matrix(ncol = 4, nrow = 0))
                           , c("Alpha", "Omega", "Cutoff", "Coefficient"))
 tobit_data <- quantile_data
 
-counter <- 1
+# Set ranges of parameters to loop over
 alpha_range <- c(-3, -2, -1, 0, 1, 2, 3)
 omega_range <- 1:7
 cutoff_range <- c(.65, .7, .75, .8, .85, .9, .95)
+
+# Progress.txt will display the progress of the simulation
+counter <- 1
+total <- length(alpha_range) * length(omega_range) * length(cutoff_range) * boot
 
 for (alpha in alpha_range) {
   for (omega in omega_range) {
